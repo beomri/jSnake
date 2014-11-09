@@ -1,0 +1,265 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>snake</title>
+    <style type="text/css">
+        div#game
+        {
+            border-style: solid;
+            border-width: medium;
+            background-color: #C9C4D5;
+            width: 600px;
+            height: 600px;
+            position: relative;
+        }
+        p.snake
+        {
+            background-color: #FF3300;
+            width: 30px;
+            height: 30px;
+            position: absolute;
+            margin: 0px 0px 0px 0px;
+        }
+        p#food
+        {
+            background-color: #99FF33;
+            width: 30px;
+            height: 30px;
+            position: absolute;
+            margin: 0px 0px 0px 0px;
+        }
+        div#scores
+        {
+            font-family: Arial;
+            font-size: xx-large;
+            font-weight: bolder;
+        }
+    </style>
+
+    <script type="text/javascript">
+    
+    score = 0;
+    higscore = 0;
+    
+    gameEdge = 510;
+    
+    headX = 0;
+    headY = 0;
+    
+    foodX = 0;
+    foodY = 0;
+    
+    Xs = new Array();
+    Ys = new Array();
+    
+    numOfSquares = 0;
+    idOfLast = 0;
+    
+    dir = 0;
+    
+    startPos = 30;
+    
+    started = false;
+    
+    canTurn = true;
+
+    function newGame()
+    {
+        game.style.width = 510+"px";
+        game.style.height = 510+"px";
+        Xs = new Array();
+        Ys = new Array();
+        numOfSquares = 0;
+        idOfLast = 0;
+        game.innerHTML = "<p id=\"food\"></p>";
+        addSquare();
+        score = 0;
+        s.innerHTML = score;
+        dir = 0;
+        place(idOfLast);
+        placeFood();
+    }
+    
+    function begin()
+    {
+        started = true;
+        timer = self.setInterval("move();", 75);
+    }
+
+    function place(sid)
+    {
+        headX = startPos;
+        headY = startPos;
+        document.getElementById("s"+sid).style.top = headY + "px";
+        document.getElementById("s"+sid).style.left = headX + "px";
+    }
+
+    function placeFood()
+    {
+        foodX = Math.floor(Math.random() * ((gameEdge / 30)-1)) * 30;
+        foodY = Math.floor(Math.random() * ((gameEdge / 30)-1)) * 30;
+        if(checkFoodCollision())
+            placeFood();
+        food.style.left = foodX + "px";
+        food.style.top = foodY + "px";
+    }
+    
+    function checkFoodCollision()
+    {
+        for(i=0;i<numOfSquares;i++)
+        {
+            if(foodX == Xs[i] && foodY == Ys[i])
+            {
+                    return true;
+            }
+        }
+        return false;
+    }
+    
+    function move()
+    {
+        if(dir == 37)
+        {
+            headX -= 30;
+            document.getElementById("s"+idOfLast).style.left = headX + "px";
+            document.getElementById("s"+idOfLast).style.top = headY + "px";
+            Xs[idOfLast] = headX;
+            Ys[idOfLast] = headY;
+        }
+        if(dir == 38)
+        {
+            headY -= 30;
+            document.getElementById("s"+idOfLast).style.left = headX + "px";
+            document.getElementById("s"+idOfLast).style.top = headY + "px";
+            Xs[idOfLast] = headX;
+            Ys[idOfLast] = headY;
+        }
+        if(dir == 39)
+        {
+            headX += 30;
+            document.getElementById("s"+idOfLast).style.left = headX + "px";
+            document.getElementById("s"+idOfLast).style.top = headY + "px";
+            Xs[idOfLast] = headX;
+            Ys[idOfLast] = headY;
+        }
+        if(dir == 40)
+        {
+            headY += 30;
+            document.getElementById("s"+idOfLast).style.left = headX + "px";
+            document.getElementById("s"+idOfLast).style.top = headY + "px";
+            Xs[idOfLast] = headX;
+            Ys[idOfLast] = headY;
+        }
+        canTurn = true;
+        if(checkCollision())
+        {
+            alert("Game Over");
+            started = false;
+            clearInterval(timer);
+            newGame();
+        }
+        else
+        {
+        
+        if(headX == foodX && headY == foodY)
+            eaten();
+        
+        }
+        idOfLast++;
+        if(idOfLast == numOfSquares)
+            idOfLast = 0;
+    }
+    
+    function eaten()
+    {
+        score += 10;
+        if(score > higscore)
+        {
+            higscore = score;
+        }
+        s.innerHTML = score;
+        hs.innerHTML = higscore;
+        placeFood();
+        addSquare();
+    }
+    
+    function addSquare()
+    {
+        game.innerHTML += "<p class=\"snake\" id=\"s" + numOfSquares + "\" style=\"top:" + headY + "px;left:" + headX + "px\"></p>";
+        Xs[numOfSquares] = headX;
+        Ys[numOfSquares] = headY;
+        numOfSquares++;
+    }
+    
+    function checkCollision()
+    {
+        if(headY < 0 || headY >= gameEdge || headX < 0 || headX >= gameEdge)
+            return true;
+        for(i=0;i<numOfSquares;i++)
+        {
+            if(headX == Xs[i] && headY == Ys[i])
+            {
+                if(i != idOfLast)
+                    return true;
+            }
+        }
+        return false;
+    }
+    
+    function changeDir(num)
+    {
+        if(dir - num != 2 && num - dir != 2 && canTurn)
+        {
+            dir = num;
+            canTurn = false;
+        }
+        if(!started)
+            begin();
+        return false;
+    }
+    
+    function getKey(event)
+    {
+        if(event.keyCode<41&&event.keyCode>36)
+            changeDir(event.keyCode);
+    }
+    </script>
+
+</head>
+<body style="overflow: hidden;" onload="newGame();" onkeydown="getKey(event);">
+    <table>
+        <tr>
+            <td>
+                Use the arrow keys to move.
+            </td>
+            <td>
+                <p id="creds">
+                    Created by <a href="mailto:beomri@gmail.com">Omri Ben-Dov</a></p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div id="game">
+                    <p id="food">
+                    </p>
+                </div>
+            </td>
+            <td>
+                <div id="scores">
+                    <p>
+                        Current score:</p>
+                    <p id="s">
+                        0
+                    </p>
+                    <br />
+                    <p>
+                        Best score:</p>
+                    <p id="hs">
+                        0
+                    </p>
+                </div>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
